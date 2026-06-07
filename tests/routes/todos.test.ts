@@ -102,6 +102,17 @@ describe('PATCH /todos/:id', () => {
     expect(res.status).toBe(404)
     expect(await res.json()).toEqual({ error: 'Not found' })
   })
+
+  it('returns 400 when title is empty string', async () => {
+    const app = buildApp()
+    const res = await app.request('http://localhost/todos/1', {
+      method: 'PATCH',
+      headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: '' }),
+    })
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'title cannot be empty' })
+  })
 })
 
 describe('DELETE /todos/:id', () => {

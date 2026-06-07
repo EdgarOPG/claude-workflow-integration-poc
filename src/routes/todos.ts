@@ -23,6 +23,10 @@ todosRouter.patch('/:id', async (c) => {
   const id = Number(c.req.param('id'))
   const body = await c.req.json<{ title?: string; completed?: boolean }>()
 
+  if (body.title !== undefined && body.title.trim() === '') {
+    return c.json({ error: 'title cannot be empty' }, 400)
+  }
+
   const [todo] = await sql`
     UPDATE todos
     SET
