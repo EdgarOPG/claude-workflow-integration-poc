@@ -18,3 +18,28 @@ todosRouter.post('/', async (c) => {
   `
   return c.json(todo, 201)
 })
+
+todosRouter.patch('/:id', async (c) => {
+  const id = Number(c.req.param('id'))
+  const body = await c.req.json<{ title?: string; completed?: boolean }>()
+
+  const [todo] = await sql`
+    UPDATE todos
+    SET
+      title     = COALESCE(${body.title ?? null}, title),
+      completed = COALESCE(${body.completed ?? null}, completed)
+    WHERE id = ${id}
+    RETURNING *
+  `
+  if (!todo) return c.json({ error: 'Not found' }, 404)
+  return c.json(todo)
+})
+
+todosRouter.delete('/:id', async (c) => {
+  const id = Number(c.req.param('id'))
+  const [deleted] = await sql`
+    DELETE FROM todos WHERE id = ${id} RETURNING id
+  `
+  if (!deleted) return c.json({ error: 'Not found' }, 404)
+  return new Response(null, { status: 204 })
+})

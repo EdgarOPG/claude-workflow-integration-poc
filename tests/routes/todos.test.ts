@@ -74,3 +74,55 @@ describe('POST /todos', () => {
     expect(body).toEqual({ error: 'title is required' })
   })
 })
+
+describe('PATCH /todos/:id', () => {
+  it('updates a todo and returns it', async () => {
+    const updated = { id: 1, title: 'Buy oat milk', completed: true, created_at: new Date() }
+    vi.mocked(sql).mockResolvedValueOnce([updated])
+    const app = buildApp()
+    const res = await app.request('http://localhost/todos/1', {
+      method: 'PATCH',
+      headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Buy oat milk', completed: true }),
+    })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.title).toBe('Buy oat milk')
+    expect(body.completed).toBe(true)
+  })
+
+  it('returns 404 when todo not found', async () => {
+    vi.mocked(sql).mockResolvedValueOnce([])
+    const app = buildApp()
+    const res = await app.request('http://localhost/todos/999', {
+      method: 'PATCH',
+      headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed: true }),
+    })
+    expect(res.status).toBe(404)
+    expect(await res.json()).toEqual({ error: 'Not found' })
+  })
+})
+
+describe('DELETE /todos/:id', () => {
+  it('deletes a todo and returns 204', async () => {
+    vi.mocked(sql).mockResolvedValueOnce([{ id: 1 }])
+    const app = buildApp()
+    const res = await app.request('http://localhost/todos/1', {
+      method: 'DELETE',
+      headers: { Authorization: AUTH },
+    })
+    expect(res.status).toBe(204)
+  })
+
+  it('returns 404 when todo not found', async () => {
+    vi.mocked(sql).mockResolvedValueOnce([])
+    const app = buildApp()
+    const res = await app.request('http://localhost/todos/999', {
+      method: 'DELETE',
+      headers: { Authorization: AUTH },
+    })
+    expect(res.status).toBe(404)
+    expect(await res.json()).toEqual({ error: 'Not found' })
+  })
+})
