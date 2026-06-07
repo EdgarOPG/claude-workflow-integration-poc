@@ -12,11 +12,10 @@ Todos REST API built with [Hono](https://hono.dev/), TypeScript, postgres.js, an
 ### With Docker Compose (production-like)
 
 ```bash
-# 1. Build and start
-npm run build
+# Build image and start (build happens inside Docker)
 docker compose up --build
 
-# 2. Test it
+# Test it
 curl -H "Authorization: Bearer supersecret" http://localhost:3000/todos
 ```
 
